@@ -1,0 +1,37 @@
+version: "3"
+
+
+networks:
+  traefik:
+    external: true
+
+services:
+  server:
+    image: gitea/gitea:latest
+    container_name: gitea
+    environment:
+      - USER_UID=1001
+      - USER_GID=1001
+    ports:
+      - '2222:22'
+    restart: always
+    volumes:
+      - ./data:/data
+      - /home/git/.ssh:/data/git/.ssh
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.gitea.loadbalancer.server.port=3000
+
+      - traefik.http.routers.gitea-http.rule=Host(`gitea.${DOMAINNAME}`)
+      - traefik.http.routers.gitea-http.entrypoints=web
+      - traefik.http.routers.gitea-http.middlewares=redirect-https
+      - traefik.http.routers.gitea-http.service=gitea
+
+      - traefik.http.routers.gitea-https.rule=Host(`gitea.${DOMAINNAME}`)
+      - traefik.http.routers.gitea-https.entrypoints=websecure
+      - traefik.http.routers.gitea-https.tls=true
+      - traefik.http.routers.gitea-https.service=gitea

@@ -1,0 +1,37 @@
+version: '3'
+
+networks:
+  traefik:
+    external: true
+
+services:
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - traefik
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      # - WATCHTOWER_MONITOR_ONLY=true
+      - WATCHTOWER_NOTIFICATIONS=gotify
+      - WATCHTOWER_NOTIFICATION_GOTIFY_URL=http://gotify
+      - WATCHTOWER_NOTIFICATION_GOTIFY_TOKEN=${GOTIFY_TOKEN}
+      - WATCHTOWER_NOTIFICATION_GOTIFY_TLS_SKIP_VERIFY=true
+
+    # labels:
+    #   - traefik.enable=true
+    #   - traefik.http.services.watchtower.loadbalancer.server.port=80
+
+    #   - traefik.http.routers.watchtower-http.rule=Host(`watchtower.${DOMAINNAME}`)
+    #   - traefik.http.routers.watchtower-http.entrypoints=web
+    #   - traefik.http.routers.watchtower-http.middlewares=redirect-https
+    #   - traefik.http.routers.watchtower-http.service=watchtower
+
+    #   - traefik.http.routers.watchtower-https.rule=Host(`watchtower.${DOMAINNAME}`)
+    #   - traefik.http.routers.watchtower-https.entrypoints=websecure
+    #   - traefik.http.routers.watchtower-https.tls=true
+    #   - traefik.http.routers.watchtower-https.service=watchtower

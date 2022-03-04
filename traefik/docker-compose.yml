@@ -1,0 +1,61 @@
+version: '3'
+
+networks:
+  traefik:
+    external: true
+
+
+services:
+  # traefik
+  traefik:
+    # The official v2 Traefik docker image
+    image: traefik:latest
+    container_name: traefik
+    environment:
+      - TZ=America/New_York
+    restart: always
+    # Enables the web UI and tells Traefik to listen to docker
+    command:
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.ssh.address=:22
+      - --providers.docker
+      - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/config
+      - --providers.file.watch=true
+      - --log.level=INFO
+      - --global.sendAnonymousUsage
+      - --accesslog.fields.names.StartUTC=drop
+    ports:
+      - 80:80
+      - 443:443
+      # - 22:22
+
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/:/config/
+      - ./certs/:/certs/
+    networks:
+      - traefik
+    labels:
+      - com.centurylinklabs.watchtower.monitor-only="true"
+      # traefik global setup
+      - traefik.http.middlewares.redirect-https.redirectScheme.scheme=https
+      - traefik.http.middlewares.redirect-https.redirectScheme.permanent=true
+
+      # traefik dashboard setup
+      - traefik.enable=true
+      - traefik.http.services.traefik.loadbalancer.server.port=8080
+
+      - traefik.http.routers.traefik-http.rule=Host(`traefik.${DOMAINNAME}`)
+      - traefik.http.routers.traefik-http.entrypoints=web
+      - traefik.http.routers.traefik-http.middlewares=redirect-https
+      - traefik.http.routers.traefik-http.service=traefik
+
+      - traefik.http.routers.traefik-https.rule=Host(`traefik.${DOMAINNAME}`)
+      - traefik.http.routers.traefik-https.entrypoints=websecure
+      - traefik.http.routers.traefik-https.tls=true
+      - traefik.http.routers.traefik-https.service=traefik

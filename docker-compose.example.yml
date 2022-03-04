@@ -1,0 +1,30 @@
+version: '3'
+
+networks:
+  traefik:
+    external: true
+
+services:
+
+  SERVICE_NAME:
+    container_name: SERVICE_NAME
+    image: SERVICE_NAME:latest
+    restart: unless-stopped
+    volumes:
+      - ./config:/config
+    networks:
+      - traefik
+    environment:
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.SERVICE_NAME.loadbalancer.server.port=80
+
+      - traefik.http.routers.SERVICE_NAME-http.rule=Host(`SERVICE_NAME.${DOMAINNAME}`)
+      - traefik.http.routers.SERVICE_NAME-http.entrypoints=web
+      - traefik.http.routers.SERVICE_NAME-http.middlewares=redirect-https
+      - traefik.http.routers.SERVICE_NAME-http.service=SERVICE_NAME
+
+      - traefik.http.routers.SERVICE_NAME-https.rule=Host(`SERVICE_NAME.${DOMAINNAME}`)
+      - traefik.http.routers.SERVICE_NAME-https.entrypoints=websecure
+      - traefik.http.routers.SERVICE_NAME-https.tls=true
+      - traefik.http.routers.SERVICE_NAME-https.service=SERVICE_NAME

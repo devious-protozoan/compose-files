@@ -1,0 +1,40 @@
+version: '3'
+
+
+
+networks:
+  traefik:
+    external: true
+
+
+services:
+  jellyfin:
+    image: ghcr.io/linuxserver/jellyfin
+    container_name: jellyfin
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: America/New_York
+    volumes:
+      - ./config:/config
+      - ${DATA}/music:/data/music
+      - ${DATA}/media:/data/media
+      - /opt/vc/lib:/opt/vc/lib #optional
+    networks:
+      - traefik
+    devices:
+      - /dev/dri:/dev/dri #optional
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.jellyfin.loadbalancer.server.port=8096
+
+      - traefik.http.routers.jellyfin-http.rule=Host(`media.${DOMAINNAME}`)
+      - traefik.http.routers.jellyfin-http.entrypoints=web
+      - traefik.http.routers.jellyfin-http.middlewares=redirect-https
+      - traefik.http.routers.jellyfin-http.service=jellyfin
+
+      - traefik.http.routers.jellyfin-https.rule=Host(`media.${DOMAINNAME}`)
+      - traefik.http.routers.jellyfin-https.entrypoints=websecure
+      - traefik.http.routers.jellyfin-https.tls=true
+      - traefik.http.routers.jellyfin-https.service=jellyfin

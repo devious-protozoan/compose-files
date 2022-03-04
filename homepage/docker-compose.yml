@@ -1,0 +1,29 @@
+version: "3"
+
+
+networks:
+  traefik:
+    external: true
+
+services:
+  homepage:
+    container_name: homepage
+    image: httpd:latest
+    restart: always
+    volumes:
+    #   - './config/httpd.conf:/usr/local/apache2/conf/httpd.conf'
+      - ./config/data/:/usr/local/apache2/htdocs/
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.homepage.loadbalancer.server.port=80
+
+      - traefik.http.routers.homepage-http.rule=Host(`home.${DOMAINNAME}`)
+      - traefik.http.routers.homepage-http.entrypoints=web
+      - traefik.http.routers.homepage-http.service=homepage
+
+      - traefik.http.routers.homepage-https.rule=Host(`home.${DOMAINNAME}`)
+      - traefik.http.routers.homepage-https.entrypoints=websecure
+      - traefik.http.routers.homepage-https.tls=true
+      - traefik.http.routers.homepage-https.service=homepage
