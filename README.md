@@ -3,16 +3,6 @@
 create .env files in each directory from the respective templates
 
 
-#### bookstack
-```
-DBHOST=bookstackdb
-DATABASE=bookstackdb
-DBUSER=bookstack
-PASSWORD=some password
-ROOTPASSWORD=some different password
-DOMAINNAME=some domain name
-```
-
 #### gitea, gotify, hompage, phpmyadmin, traefik
 ```
 DOMAINNAME=some domain name
