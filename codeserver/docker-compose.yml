@@ -7,20 +7,19 @@ networks:
 services:
   codeserver:
     container_name: code-server
-    image: lscr.io/linuxserver/code-server:latest
+    image: codercom/code-server:latest
     restart: unless-stopped
     volumes:
       - ./config:/home/coder/.config
+      - ./../:/home/coder/project
     networks:
       - traefik
     environment:
       - DOCKER_USER=$USER
-      - PUID=1000
-      - GUID=1000
-      - DEFAULT_WORKSPACE=../
+    user: "1000:1000"
     labels:
       - traefik.enable=true
-      - traefik.http.services.code-server.loadbalancer.server.port=8443
+      - traefik.http.services.code-server.loadbalancer.server.port=8080
 
       - traefik.http.routers.code-server-http.rule=host(`code.${DOMAINNAME}`)
       - traefik.http.routers.code-server-http.entrypoints=web
