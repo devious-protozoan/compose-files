@@ -3,7 +3,7 @@
 create .env files in each directory from the respective templates
 
 
-#### gitea, gotify, hompage, phpmyadmin, traefik
+#### gitea, gotify, hompage, phpmyadmin, traefik, codeserver
 ```
 DOMAINNAME=some domain name
 ```
