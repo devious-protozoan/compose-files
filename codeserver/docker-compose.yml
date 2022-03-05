@@ -5,8 +5,7 @@ networks:
     external: true
 
 services:
-
-  SERVICE_NAME:
+  codeserver:
     container_name: code-server
     image: codercom/code-server:latest
     restart: unless-stopped
@@ -17,8 +16,7 @@ services:
       - traefik
     environment:
       - DOCKER_USER=$USER
-    user:
-      - "1000:1000"
+    user: "1000:1000"
     labels:
       - traefik.enable=true
       - traefik.http.services.code-server.loadbalancer.server.port=80
