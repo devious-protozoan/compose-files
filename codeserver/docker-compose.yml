@@ -1,0 +1,34 @@
+version: '3'
+
+networks:
+  traefik:
+    external: true
+
+services:
+
+  SERVICE_NAME:
+    container_name: code-server
+    image: codercom/code-server:latest
+    restart: unless-stopped
+    volumes:
+      - ./config:/home/coder/.config
+      - ../:/home/coder/project
+    networks:
+      - traefik
+    environment:
+      - DOCKER_USER=$USER
+    user:
+      - "1000:1000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.code-server.loadbalancer.server.port=80
+
+      - traefik.http.routers.code-server-http.rule=host(`code.${DOMAINNAME}`)
+      - traefik.http.routers.code-server-http.entrypoints=web
+      - traefik.http.routers.code-server-http.middlewares=redirect-https
+      - traefik.http.routers.code-server-http.service=code-server
+
+      - traefik.http.routers.code-server-https.rule=Host(`code.${DOMAINNAME}`)
+      - traefik.http.routers.code-server-https.entrypoints=websecure
+      - traefik.http.routers.code-server-https.tls=true
+      - traefik.http.routers.code-server-https.service=code-server
