@@ -1,0 +1,35 @@
+version: '3'
+
+networks:
+  traefik:
+    external: true
+
+services:
+  grist:
+    container_name: grist
+    image: gristlabs/grist:latest
+    restart: unless-stopped
+    volumes:
+      - ./config:/persist
+    networks:
+      - traefik
+    environment:
+      - DEBUG=1
+      - GRIST_SINGLE_ORG=docs
+      # - APP_DOC_URL=https://grist.$DOMAINNAME
+      # - APP_HOME_URL=https://grist.$DOMAINNAME
+      # - APP_DOC_INTERNAL_URL=http://localhost:8484
+      - GRIST_DEFAULT_EMAIL=$EMAIL
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.grist.loadbalancer.server.port=8484
+
+      - traefik.http.routers.grist-http.rule=Host(`grist.${DOMAINNAME}`)
+      - traefik.http.routers.grist-http.entrypoints=web
+      - traefik.http.routers.grist-http.middlewares=redirect-https
+      - traefik.http.routers.grist-http.service=grist
+
+      - traefik.http.routers.grist-https.rule=Host(`grist.${DOMAINNAME}`)
+      - traefik.http.routers.grist-https.entrypoints=websecure
+      - traefik.http.routers.grist-https.tls=true
+      - traefik.http.routers.grist-https.service=grist

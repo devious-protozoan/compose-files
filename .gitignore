@@ -2,15 +2,14 @@
 
 gitea/data
 gotify/data/
+grist/config/
 homepage/config/
 jellyfin/config/
 nextcloud/apps
 nextcloud/config
 nextcloud/db
-pihole/config
-pihole/dnsmasq
-pihole/pihole.log
 ssl/*
+technitiumDNS/config/
 traefik/certs
 traefik/config
 vaultwarden/data
